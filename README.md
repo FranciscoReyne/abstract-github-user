@@ -5,7 +5,7 @@ Resumidor de usuarios de github con AI
 ````python
 
 # Instalamos las dependencias necesarias
-!pip install -q langchain huggingface_hub langchain_huggingface google-generativeai
+!pip install -q langchain langchain_google_genai google-generativeai tqdm
 
 import os
 import requests
@@ -13,7 +13,7 @@ import base64
 import time
 from tqdm import tqdm
 import re
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import GoogleGenerativeAIChat  # Corregido
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 
@@ -145,21 +145,31 @@ def setup_llm():
     """Configura el modelo de lenguaje (Gemini Pro de Google)."""
     # Configurar la clave API para Gemini
     from google.colab import userdata
-    os.environ["GOOGLE_API_KEY"] = userdata.get('GOOGLE_API_KEY', '')
     
-    # Si no hay API key almacenada, pedirla
-    if not os.environ["GOOGLE_API_KEY"]:
+    # Intentar obtener la clave API
+    try:
+        api_key = userdata.get('GOOGLE_API_KEY', '')
+    except:
+        api_key = ''
+        
+    if not api_key:
         print("Necesitamos una API key de Google para Gemini. ")
         print("Puedes obtener una gratis en: https://makersuite.google.com/app/apikey")
-        os.environ["GOOGLE_API_KEY"] = input("Ingresa tu API key de Google Gemini: ")
-        # Opcional: guardar para futura referencia en esta sesión de Colab
-        userdata.set('GOOGLE_API_KEY', os.environ["GOOGLE_API_KEY"])
+        api_key = input("Ingresa tu API key de Google Gemini: ")
+        # Establecer la clave API
+        os.environ["GOOGLE_API_KEY"] = api_key
+        # Intentar guardar para futuras referencias
+        try:
+            userdata.set('GOOGLE_API_KEY', api_key)
+        except:
+            pass
+    else:
+        os.environ["GOOGLE_API_KEY"] = api_key
     
     # Crear modelo
-    llm = ChatGoogleGenerativeAI(
+    llm = GoogleGenerativeAIChat(
         model="gemini-pro",
-        temperature=0.5,
-        convert_system_message_to_human=True
+        temperature=0.5
     )
     
     return llm
@@ -299,8 +309,6 @@ if __name__ == "__main__":
     print(f"PERFIL DE {username.upper()}")
     print("="*50)
     print(profile)
-
-
 
 ````
 

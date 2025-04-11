@@ -1,7 +1,7 @@
 # abstract-github-user
 Resumidor de usuarios de github con AI
 
-**ATENCION: proyecto en contruccion** Se requiere google api key : https://aistudio.google.com/app/apikey
+**ATENCION: proyecto en contruccion.** Requiere google api key : https://aistudio.google.com/app/apikey
 
 ````python
 
